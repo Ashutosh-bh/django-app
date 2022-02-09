@@ -3,6 +3,13 @@ from rest_framework import serializers
 from restaurant.models import MenuCategory, MenuSubCategory, MenuItem, Restaurant
 
 
+class RestaurantSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Restaurant
+        exclude = ('is_deleted',)
+
+
 class RestaurantMenuSerializer(serializers.ModelSerializer):
     menu_categories = serializers.SerializerMethodField()
     restaurant_id = serializers.SerializerMethodField()
@@ -11,10 +18,12 @@ class RestaurantMenuSerializer(serializers.ModelSerializer):
         model = Restaurant
         exclude = ('is_deleted', )
 
-    def get_menu_categories(self, obj):
+    @staticmethod
+    def get_menu_categories(obj):
         return MenuSerializer(MenuCategory.objects.filter(restaurant_id=obj.id, is_deleted=False), many=True).data
 
-    def get_restaurant_id(self, obj):
+    @staticmethod
+    def get_restaurant_id(obj):
         return obj.id
 
 
@@ -26,11 +35,13 @@ class MenuSerializer(serializers.ModelSerializer):
         model = MenuCategory
         exclude = ('is_deleted', 'id')
 
-    def get_sub_categories(self, obj):
+    @staticmethod
+    def get_sub_categories(obj):
         return SubCategorySerializer(MenuSubCategory.objects.filter(category_id=obj.id, is_deleted=False),
                                      many=True).data
 
-    def get_category_id(self, obj):
+    @staticmethod
+    def get_category_id(obj):
         return obj.id
 
 
@@ -42,10 +53,12 @@ class SubCategorySerializer(serializers.ModelSerializer):
         model = MenuSubCategory
         exclude = ('is_deleted', 'id')
 
-    def get_items(self, obj):
+    @staticmethod
+    def get_items(obj):
         return ItemSerializers(MenuItem.objects.filter(sub_category_id=obj.id, is_deleted=False), many=True).data
 
-    def get_sub_category_id(self, obj):
+    @staticmethod
+    def get_sub_category_id(obj):
         return obj.id
 
 
@@ -56,5 +69,6 @@ class ItemSerializers(serializers.ModelSerializer):
         model = MenuItem
         exclude = ('is_deleted', 'id')
 
-    def get_item_id(self, obj):
+    @staticmethod
+    def get_item_id(obj):
         return obj.id
