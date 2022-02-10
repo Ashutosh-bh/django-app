@@ -2,6 +2,7 @@ from django.contrib.postgres.fields import ArrayField
 from django.db import models
 
 # Create your models here.
+from account.models import User
 from util.models import TimeStampedModel
 
 
@@ -12,6 +13,7 @@ class Restaurant(TimeStampedModel):
     address_line = models.CharField(max_length=200)
     lat = models.DecimalField(max_digits=8, decimal_places=6, default=0)
     lon = models.DecimalField(max_digits=9, decimal_places=6, default=0)
+    user = models.ForeignKey(User, null=False, on_delete=models.CASCADE, related_name='user', blank=False)
 
 
 class MenuCategory(TimeStampedModel):

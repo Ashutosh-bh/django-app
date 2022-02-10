@@ -37,7 +37,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'restaurant'
+    'rest_framework.authtoken',
+    'restaurant',
+    'account'
 ]
 
 MIDDLEWARE = [
@@ -49,6 +51,14 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.TokenAuthentication',
+    ),
+    'DATETIME_FORMAT': "%Y-%m-%dT%H:%M:%S.%f%z"
+
+}
 
 ROOT_URLCONF = 'djangoProject.urls'
 
