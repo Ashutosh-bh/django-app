@@ -2,24 +2,22 @@ from django.contrib.postgres.fields import ArrayField
 from django.db import models
 
 # Create your models here.
-from account.models import User
+from account.models import User, Address
 from util.models import TimeStampedModel
 
 
 class Restaurant(TimeStampedModel):
 
-    name = models.CharField(max_length=50)
-    type = models.CharField(max_length=50)
-    address_line = models.CharField(max_length=200)
-    lat = models.DecimalField(max_digits=8, decimal_places=6, default=0)
-    lon = models.DecimalField(max_digits=9, decimal_places=6, default=0)
-    user = models.ForeignKey(User, null=False, on_delete=models.CASCADE, related_name='user', blank=False)
+    name = models.CharField(max_length=50, null=False)
+    type = models.CharField(max_length=50, null=False)
+    address = models.ForeignKey(Address, null=False, on_delete=models.CASCADE, related_name='rest_address', blank=False)
+    user = models.ForeignKey(User, null=False, on_delete=models.CASCADE, related_name='rest_user', blank=False)
 
 
 class MenuCategory(TimeStampedModel):
 
     restaurant = models.ForeignKey(Restaurant, null=False, on_delete=models.CASCADE, related_name='restaurant')
-    name = models.CharField(max_length=50)
+    name = models.CharField(max_length=50, null=False)
     description = models.CharField(max_length=200)
     is_available = models.BooleanField(default=True)
 
@@ -28,7 +26,7 @@ class MenuSubCategory(TimeStampedModel):
 
     category = models.ForeignKey(MenuCategory, null=False, on_delete=models.CASCADE, related_name='menu_category',
                                  blank=False)
-    name = models.CharField(max_length=50)
+    name = models.CharField(max_length=50, null=False)
     description = models.CharField(max_length=200)
     is_available = models.BooleanField(default=True)
 
@@ -37,8 +35,10 @@ class MenuItem(TimeStampedModel):
 
     sub_category = models.ForeignKey(MenuSubCategory, null=False, on_delete=models.CASCADE,
                                      related_name='menu_sub_category')
-    name = models.CharField(max_length=50)
+    name = models.CharField(max_length=50, null=False)
     description = models.CharField(max_length=200)
-    images = ArrayField(models.CharField(max_length=500))
+    images = ArrayField(models.CharField(max_length=500), null=False)
     is_available = models.BooleanField(default=True)
-    price = models.DecimalField(max_digits=20, decimal_places=2, default=0)
+    price = models.DecimalField(max_digits=20, decimal_places=2, default=0, null=False)
+    variations = models.JSONField(null=True)
+    add_ons = models.JSONField(null=True)

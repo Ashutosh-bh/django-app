@@ -1,7 +1,8 @@
-# from django.contrib import admin
-# # Register your models here.
-# from django.contrib.auth.admin import UserAdmin
-#
-# from account import models
-#
-# admin.site.register(models.User, UserAdmin)
+from django.contrib import admin
+# Register your models here.
+from django.contrib.auth.admin import UserAdmin
+
+from account import models
+
+admin.site.register(models.User, UserAdmin)
+admin.site.register(models.Address)

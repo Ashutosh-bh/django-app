@@ -1,18 +1,27 @@
 from rest_framework import serializers
 
+from account.models import Address, User
+from account.serializers import AddressSerializer
 from restaurant.models import MenuCategory, MenuSubCategory, MenuItem, Restaurant
 
 
 class RestaurantSerializer(serializers.ModelSerializer):
 
+    address = serializers.SerializerMethodField()
+
     class Meta:
         model = Restaurant
         exclude = ('is_deleted',)
+
+    @staticmethod
+    def get_address(obj):
+        return AddressSerializer(Address.objects.filter(id=obj.address_id, is_deleted=False).all(), many=True).data
 
 
 class RestaurantMenuSerializer(serializers.ModelSerializer):
     menu_categories = serializers.SerializerMethodField()
     restaurant_id = serializers.SerializerMethodField()
+    address = serializers.SerializerMethodField()
 
     class Meta:
         model = Restaurant
@@ -25,6 +34,10 @@ class RestaurantMenuSerializer(serializers.ModelSerializer):
     @staticmethod
     def get_restaurant_id(obj):
         return obj.id
+
+    @staticmethod
+    def get_address(obj):
+        return AddressSerializer(Address.objects.filter(id=obj.address_id, is_deleted=False).first()).data
 
 
 class MenuSerializer(serializers.ModelSerializer):

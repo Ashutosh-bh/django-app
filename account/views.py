@@ -5,31 +5,36 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.authtoken.models import Token
 from rest_framework.permissions import IsAuthenticated
 
-from account.models import User
+from account.models import User, Address, UserAddressMapping
 from util.common import send_response
 
 
 class CreateUserView(generics.CreateAPIView):
-    # authentication_classes = (TokenAuthentication,)
-    # permission_classes = (IsAuthenticated,)
 
     def create(self, request, *args, **kwargs):
         print('request received to create user is', request.data)
         password = request.data.pop('password')
-        user = User(**request.data, is_active=True, is_staff=False, date_joined=timezone.localtime())
+        addresses = request.data.pop('address')
+        user = User(**request.data, is_active=True, is_staff=False, date_joined=timezone.localtime(),
+                    username=request.data['mobile'])
         user.set_password(password)
         user.save()
+        for address in addresses:
+            obj = Address(**address)
+            obj.save()
+            UserAddressMapping(user_id=user.id, address_id=obj.id).save()
         print('user created', user)
         return send_response(response_code=201, data={}, message='success', error=None)
 
 
-class AuthenticateUser(generics.CreateAPIView):
+class AuthenticateUserView(generics.CreateAPIView):
 
     def create(self, request, *args, **kwargs):
         user = authenticate(username=request.data['username'], password=request.data['password'])
         if user:
             print(user)
-            token = Token.objects.create(user=user)
+            token, is_created = Token.objects.get_or_create(user=user)
+            print('new token created')
             return send_response(response_code=201, data={'token': token.key}, message='success', error=None)
         else:
             return send_response(response_code=401, data={}, message='invalid username or password', error=None)

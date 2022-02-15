@@ -1,5 +1,8 @@
 from rest_framework import generics
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
 
+from account.models import Address
 from restaurant.models import Restaurant, MenuCategory, MenuSubCategory, MenuItem
 from restaurant.serializers import RestaurantMenuSerializer, RestaurantSerializer
 from util.common import send_response
@@ -18,10 +21,15 @@ class GetMenuView(generics.ListAPIView):
 
 class SaveRestaurantView(generics.CreateAPIView):
     serializer_class = RestaurantSerializer
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
 
     def create(self, request, *args, **kwargs):
         print('request received to create restaurant is', request.data)
-        restaurant = Restaurant(**request.data)
+        address = request.data.pop('address')
+        add_obj = Address(**address, address_type=Address.RESTAURANT)
+        add_obj.save()
+        restaurant = Restaurant(**request.data, user_id=request.user.id, address_id=add_obj.id)
         restaurant.save()
         data = self.serializer_class(restaurant).data
         print('returning response', data)
@@ -31,6 +39,8 @@ class SaveRestaurantView(generics.CreateAPIView):
 class GetAllRestaurantView(generics.ListAPIView):
     serializer_class = RestaurantSerializer
     queryset = Restaurant.objects.filter(is_deleted=False).all()
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
 
     def list(self, request, *args, **kwargs):
         print('request received to get all restaurant ')
