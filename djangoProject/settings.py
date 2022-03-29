@@ -39,7 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework.authtoken',
     'restaurant',
-    'account'
+    'account',
+    'order'
 ]
 
 MIDDLEWARE = [

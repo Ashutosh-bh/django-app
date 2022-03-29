@@ -1,3 +1,5 @@
+from django.db.models import F, ExpressionWrapper, FloatField
+from django.db.models.functions import Power, Cos
 from rest_framework import generics
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
@@ -38,15 +40,30 @@ class SaveRestaurantView(generics.CreateAPIView):
 
 class GetAllRestaurantView(generics.ListAPIView):
     serializer_class = RestaurantSerializer
-    queryset = Restaurant.objects.filter(is_deleted=False).all()
+    queryset = Restaurant.objects
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
 
     def list(self, request, *args, **kwargs):
         print('request received to get all restaurant ')
-        data = self.serializer_class(self.get_queryset(), many=True).data
+        query_set = self.add_filters(request)
+        data = self.serializer_class(query_set.all(), many=True).data
         print('returning response', data)
         return send_response(response_code=200, data=data, message='success', error=None)
+
+    def add_filters(self, request):
+        queryset = self.get_queryset()
+        print(request.GET)
+        if 'loc' in request.GET:
+            lat, lon = request.GET['loc'].split(',')
+            queryset = queryset.annotate(dist=ExpressionWrapper(
+                Power(69.1 * (float(lat) - F('lat')), 2) +
+                Power(69.1 * (F('lon') - float(lon)) * Cos(float(lon) / 57.3), 2),
+                output_field=FloatField())).filter(dist__lte=request.GET.get('dist', 5))
+        if 'name' in request.GET:
+            queryset = queryset.filter(name__icontains=request.GET['name'])
+        queryset = queryset.filter(is_deleted=False)
+        return queryset
 
 
 class SaveMenuView(generics.CreateAPIView):

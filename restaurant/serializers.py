@@ -8,10 +8,11 @@ from restaurant.models import MenuCategory, MenuSubCategory, MenuItem, Restauran
 class RestaurantSerializer(serializers.ModelSerializer):
 
     address = serializers.SerializerMethodField()
+    dist = serializers.FloatField(required=False)
 
     class Meta:
         model = Restaurant
-        exclude = ('is_deleted',)
+        exclude = ('is_deleted', 'lat', 'lon')
 
     @staticmethod
     def get_address(obj):

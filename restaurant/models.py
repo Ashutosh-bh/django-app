@@ -10,8 +10,10 @@ class Restaurant(TimeStampedModel):
 
     name = models.CharField(max_length=50, null=False)
     type = models.CharField(max_length=50, null=False)
-    address = models.ForeignKey(Address, null=False, on_delete=models.CASCADE, related_name='rest_address', blank=False)
+    address = models.OneToOneField(Address, null=False, on_delete=models.CASCADE, related_name='rest_address', blank=False)
     user = models.ForeignKey(User, null=False, on_delete=models.CASCADE, related_name='rest_user', blank=False)
+    lat = models.DecimalField(max_digits=8, decimal_places=6)
+    lon = models.DecimalField(max_digits=9, decimal_places=6)
 
 
 class MenuCategory(TimeStampedModel):
